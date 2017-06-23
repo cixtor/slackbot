@@ -36,6 +36,43 @@ func NewSlackbot() *Slackbot {
 	}
 }
 
+// LogRobotMessage writes the requested command to the system logs.
+func (s *Slackbot) LogRobotMessage(event *slackapi.MessageEvent) {
+	log.Printf(
+		"msg; [rep] %s at %s\n",
+		event.Timestamp,
+		event.Channel)
+}
+
+// LogCommand writes the requested command to the system logs.
+func (s *Slackbot) LogCommand(event *slackapi.MessageEvent) {
+	log.Printf(
+		"msg; [cmd] %s %s: %s\n",
+		event.Timestamp,
+		event.User,
+		event.Text)
+}
+
+// LogMessage writes the user message to the system logs.
+func (s *Slackbot) LogMessage(event *slackapi.MessageEvent) {
+	/* monitor other messages (cut to 76 chars) */
+	if len(event.Text) > 76 {
+		log.Printf(
+			"msg; [new] %s %s: %s...\n",
+			event.Timestamp,
+			event.User,
+			event.Text[0:76])
+		return
+	}
+
+	/* monitor other messages (with less than 76 characters) */
+	log.Printf(
+		"msg; [new] %s %s: %s\n",
+		event.Timestamp,
+		event.User,
+		event.Text)
+}
+
 // HandleIncomingEvents processes the websocket events.
 func (s *Slackbot) HandleIncomingEvents() {
 	log.Println("Connecting to websocket")
