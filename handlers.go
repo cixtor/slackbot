@@ -1,12 +1,14 @@
 package main
 
 import (
+	"fmt"
 	"io/ioutil"
 	"log"
 	"os"
 	"regexp"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/cixtor/slackapi"
 )
@@ -33,6 +35,11 @@ func (s *Slackbot) HandleMessage(event *slackapi.MessageEvent) {
 	}
 
 	if s.HandleHelp(event) {
+		s.LogCommand(event)
+		return
+	}
+
+	if s.HandleUptime(event) {
 		s.LogCommand(event)
 		return
 	}
@@ -66,6 +73,18 @@ func (s *Slackbot) HandleHelp(event *slackapi.MessageEvent) bool {
 
 		session := s.Client.InstantMessageOpen(event.User)
 		s.Client.ChatPostMessage(session.Channel.ID, reply)
+		return true
+	}
+
+	return false
+}
+
+// HandleUptime reacts to an uptime request.
+func (s *Slackbot) HandleUptime(event *slackapi.MessageEvent) bool {
+	if event.Text == "uptime" {
+		uptime := time.Since(time.Unix(int64(s.Startup), 0))
+		reply := fmt.Sprintf("Running since %s", uptime)
+		s.Client.ChatPostMessage(event.Channel, reply)
 		return true
 	}
 
