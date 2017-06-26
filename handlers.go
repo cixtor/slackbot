@@ -17,34 +17,37 @@ import (
 func (s *Slackbot) HandleMessage(event *slackapi.MessageEvent) {
 	/* detect bot replies */
 	if event.User == s.RobotID {
-		s.LogRobotMessage(event)
+		s.LogMessage("bot", event)
 		return
 	}
 
-	/* detect when a message is deleted */
+	/* ignore deleted messages; empty text */
 	if event.Subtype == "message_deleted" {
-		log.Printf("msg; [del] %s\n", event.Timestamp)
 		return
 	}
 
 	/* detect messages and commands sent before the service started */
 	timestamp := event.Timestamp[0:strings.Index(event.Timestamp, ".")]
 	if number, err := strconv.Atoi(timestamp); err != nil || number < s.Startup {
-		log.Printf("msg; [old] %s %s: %s\n", event.Timestamp, event.User, event.Text)
+		log.Printf(
+			"msg; [old] %s %s: %s\n",
+			event.Timestamp,
+			event.User,
+			event.Text)
 		return
 	}
 
 	if s.HandleHelp(event) {
-		s.LogCommand(event)
+		s.LogMessage("cmd", event)
 		return
 	}
 
 	if s.HandleUptime(event) {
-		s.LogCommand(event)
+		s.LogMessage("cmd", event)
 		return
 	}
 
-	s.LogMessage(event)
+	s.LogMessage("new", event)
 }
 
 // HandleHelp reacts to an uptime request.
