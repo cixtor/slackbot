@@ -11,12 +11,14 @@ import (
 
 // Slackbot defines the application metadata.
 type Slackbot struct {
-	Startup    int
-	RobotID    string
-	ChannelID  string
-	ReadmeFile string
-	Session    *slackapi.RTM
-	Client     *slackapi.SlackAPI
+	Startup     int
+	RobotID     string
+	ChannelID   string
+	ReadmeFile  string
+	ShutdownCMD string
+	Shutdown    chan bool
+	Session     *slackapi.RTM
+	Client      *slackapi.SlackAPI
 }
 
 // NewSlackbot creates a new instance of the application.
@@ -40,6 +42,7 @@ func NewSlackbot(token string) *Slackbot {
 	return &Slackbot{
 		Client:     client,
 		Startup:    startup,
+		Shutdown:   make(chan bool, 1),
 		RobotID:    authentication.UserID,
 		ReadmeFile: path.Dir(binary) + "/README.md",
 	}

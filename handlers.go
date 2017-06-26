@@ -47,6 +47,11 @@ func (s *Slackbot) HandleMessage(event *slackapi.MessageEvent) {
 		return
 	}
 
+	if s.HandleShutdown(event) {
+		s.LogMessage("cmd", event)
+		return
+	}
+
 	s.LogMessage("new", event)
 }
 
@@ -88,6 +93,16 @@ func (s *Slackbot) HandleUptime(event *slackapi.MessageEvent) bool {
 		uptime := time.Since(time.Unix(int64(s.Startup), 0))
 		reply := fmt.Sprintf("Running since %s", uptime)
 		s.Client.ChatPostMessage(event.Channel, reply)
+		return true
+	}
+
+	return false
+}
+
+// HandleShutdown reacts to an shutdown request if enabled on startup.
+func (s *Slackbot) HandleShutdown(event *slackapi.MessageEvent) bool {
+	if s.ShutdownCMD != "" && event.Text == s.ShutdownCMD {
+		s.Shutdown <- true
 		return true
 	}
 
