@@ -11,16 +11,11 @@ func main() {
 	/* optional shutdown command */
 	app.ShutdownCMD = "__shutdown"
 
-	go app.HandleIncomingEvents()
+	go func() {
+		<-app.Shutdown
+		app.Session.Disconnect()
+		log.Println("finished")
+	}()
 
-LOOP:
-	for {
-		select {
-		case <-app.Shutdown:
-			app.Session.Disconnect()
-			break LOOP
-		}
-	}
-
-	log.Println("finished")
+	app.HandleIncomingEvents()
 }
