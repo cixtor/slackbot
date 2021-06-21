@@ -79,8 +79,13 @@ func (s *Slackbot) HandleHelp(event *slackapi.MessageEvent) bool {
 		reply = reMention.ReplaceAllString(reply, `$1`)
 		reply = reAnchors.ReplaceAllString(reply, `<$2|$1>`)
 
-		session := s.Client.InstantMessageOpen(event.User)
-		s.Client.ChatPostMessage(session.Channel.ID, reply)
+		session := s.Client.ConversationsOpen(slackapi.ConversationsOpenInput{
+			Users: event.User,
+		})
+		s.Client.ChatPostMessage(slackapi.MessageArgs{
+			Channel: session.Channel.ID,
+			Text:    reply,
+		})
 		return true
 	}
 
@@ -92,7 +97,10 @@ func (s *Slackbot) HandleUptime(event *slackapi.MessageEvent) bool {
 	if event.Text == "uptime" {
 		uptime := time.Since(time.Unix(int64(s.Startup), 0))
 		reply := fmt.Sprintf("Running since %s", uptime)
-		s.Client.ChatPostMessage(event.Channel, reply)
+		s.Client.ChatPostMessage(slackapi.MessageArgs{
+			Channel: event.Channel,
+			Text:    reply,
+		})
 		return true
 	}
 

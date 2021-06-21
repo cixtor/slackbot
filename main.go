@@ -6,7 +6,7 @@ import (
 )
 
 func main() {
-	app := NewSlackbot(os.Getenv("SLACK_TOKEN"))
+	app := NewSlackbot(os.Getenv("SLACK_TOKEN"), os.Getenv("SLACK_COOKIE"))
 
 	/* optional shutdown command */
 	app.ShutdownCMD = "__shutdown"
